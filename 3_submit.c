@@ -1,6 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct __student{
+    int sc1;
+    int sc2;
+    int sc3;
+    int sc4; // 1 or 2
+    int tsa;
+}student;
+
+int compare(const void* m, const void*n){
+    student *a, *b;
+    a = (student*) m;
+    b = (student*) n;
+
+    if(a->tsa < b->tsa) return -1;
+    if(a->tsa > b->tsa) return 1;
+
+    return 0;
+}
+
 typedef struct __node{
     int data;
     struct __node* next;
@@ -8,6 +27,7 @@ typedef struct __node{
 
 
 typedef struct __list{
+    int node_Num;
     struct __node* head; //필요한가??
     //node* tail; 
 } linkedList;
@@ -16,6 +36,7 @@ linkedList* input[6][10][18][2]; //입력값, tsa 입력시 sort를 해야 할�
 
 //linked list 삽입(sort 안함)
 void insertion (int sc1, int sc2, int sc3, int sc4, int data){
+    input[sc1][sc2][sc3][sc4]->node_Num++;
     node* newnode = (node*)malloc(sizeof(node));
     newnode->data = data;
     newnode->next = NULL;
@@ -33,6 +54,8 @@ void QT1_count(int* num, int tsa, linkedList* l){
     while(n != NULL){
         if(n->data == tsa)
             (*num)++;
+        if(tsa > n->data)
+            return;
 
         n = n->next;
     }
@@ -45,6 +68,8 @@ void QT2_count(int* num, int tsa, linkedList* l){
     while(n != NULL){
         if(n->data >= tsa)
             (*num)++;
+        else
+            return;
 
         n = n->next;
     }
@@ -53,10 +78,15 @@ void QT2_count(int* num, int tsa, linkedList* l){
 }
 
 void QT3_count(int* num, int tsa, linkedList* l){
+    int k = 0;
     node* n = l->head;
     while(n != NULL){
-        if(n->data <= tsa)
-            (*num)++;
+        if(n->data > tsa)
+            k++;
+        else{
+            (*num) += l->node_Num - k;
+            break;
+        }
 
         n = n->next;
     }
@@ -187,8 +217,11 @@ void QT1 (int qc1, int qc2, int qc3, int qc4, int tsa){
     if(qc1 != 0 && qc2 != 0 && qc3 != 0 && qc4 != 0){
         QT1_count(&num, tsa, input[qc1-1][qc2-1][qc3-1][qc4-1]);
     }
-
-    printf("%d\n", num);
+	
+		if(num > 0)
+    	printf("1\n");
+		else
+			printf("0\n");
 }
 
 //쿼리 2
@@ -447,6 +480,9 @@ void QT3 (int qc1, int qc2, int qc3, int qc4, int tsa){
 }
 
 int main(){
+    int N, M;
+    int sc1, sc2, sc3, sc4, tsa;
+
     //input 배열 동적할당
     for(int i = 0; i < 6; i++){
         for(int j = 0; j < 10; j++){
@@ -454,44 +490,38 @@ int main(){
                 for(int n = 0; n < 2; n++){
                     input[i][j][m][n] = (linkedList*)malloc(sizeof(linkedList));
                     input[i][j][m][n]->head = NULL;
+                    input[i][j][m][n]->node_Num = 0;
                     //input[i][j][m][n]->tail = NULL;
                 }
             }
         }
     }
 
-    int M, N;
-    int sc1, sc2, sc3, sc4, tsa;
-
-    //데이터 입력
-    scanf("%d", &M);
-    for(int i = 0; i < M; i++){
+    scanf("%d", &N);
+    // student* temp = (student*)malloc(sizeof(student)*N);
+    for(int i = 0; i < N; i++){
         scanf("%d %d %d %d %d", &sc1, &sc2, &sc3, &sc4, &tsa);
-        
-        //쿼리 형태로 변경
-        if(sc4 < 3) //졸업 불가
-            sc4 = 2;
-        else        //졸업 가능
-            sc4 = 1;
+        // temp[i].sc1 = sc1;
+        // temp[i].sc2 = sc2;
+        // temp[i].sc3 = sc3;
 
-        //linked list에 tsa 저장
-        insertion(sc1-1, sc2-1, sc3-1, sc4-1, tsa);
+        if(sc4 > 2) sc4 = 1;
+        else sc4 = 2;
+
+        insertion(sc1 - 1, sc2-1, sc3-1, sc4-1, tsa);
+        // temp[i].sc4 = sc4;
+        // temp[i].tsa = tsa;
     }
-    
-    /*
-    linkedList* l = input[0][5][11][1];
-    node* n = l->head;
-    printf("%d", n->data);
-    while(n->next != NULL){
-        n = n->next;
-        printf("%d\n", n->data);
-    }
-    */
+
+    //sort
+    // qsort(temp, N, sizeof(student), compare);
+
+    // free(temp);
 
     //쿼리 입력
     int qt, qc1, qc2, qc3, qc4, Q_tsa;
-    scanf("%d", &N);
-    for(int i = 0; i < N; i++){
+    scanf("%d", &M);
+    for(int i = 0; i < M; i++){
         scanf("%d %d %d %d %d %d", &qt, &qc1, &qc2, &qc3, &qc4, &Q_tsa);
 
         switch (qt)
